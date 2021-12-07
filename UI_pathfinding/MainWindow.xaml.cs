@@ -28,9 +28,6 @@ using System.Windows.Shapes;
 
 namespace UI_Layout
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     /// ************************* CLASSES *************************
     /// Class       : MainWindow
     /// Description : Inherits from Window class,Contains methods to activate button
@@ -43,7 +40,10 @@ namespace UI_Layout
 
         private bool _isDrawingStart = false;
         private bool _isDrawingEnd = false;
+        private bool _isDrawingRectangle = false;
         private bool _isRemoving = false;
+
+        private bool _isDragingRectangleSize = false;
 
         public Point? StartPoint = null;
         public Point? EndPoint = null;
@@ -73,6 +73,7 @@ namespace UI_Layout
         {
             _isDrawingStart = false;
             _isDrawingEnd = false;
+            _isDrawingRectangle = false;
 
         }
         /// ************************* METHOD *************************
@@ -96,6 +97,17 @@ namespace UI_Layout
         {
             CancelDrawing();
             _isDrawingEnd = true;
+        }
+        /// ************************* METHOD *************************
+        /// Method    : DrawRectangleButton_Click
+        /// Arguments : object sender, RoutedEventArgs e
+        /// Returns   : Nothing
+        /// This method is a draw rctangle button click event, when the end button is 
+        /// clicked the drawing rectangle is enabled.
+        private void DrawRectangleButton_Click(object sender, RoutedEventArgs e)
+        {
+            CancelDrawing();
+            _isDrawingRectangle = true;
         }
         /// ************************* METHOD *************************
         /// Method    : DrawArea_OnPreviewMouseLeftButtonDown
@@ -145,6 +157,23 @@ namespace UI_Layout
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
             }
+            //Code for drawing rectangle in blue color for dragged area with mouse
+            if (_isDrawingRectangle)
+            {
+                DrawArea.CaptureMouse();
+                anchorPoint = e.MouseDevice.GetPosition(DrawArea);
+
+                _currentItem = new Rectangle()
+                {
+                    Fill = new SolidColorBrush(Colors.Blue),
+                    Tag = "Obstacle"
+                };
+
+                DrawArea.Children.Add(_currentItem);
+                CancelDrawing();
+
+                _isDragingRectangleSize = true;
+            }
 
             //Panel.SetZIndex(_currentItem, -10);
 
@@ -161,8 +190,9 @@ namespace UI_Layout
                     }
                 };
 
+                //Code for removing elements from the draw area.
                 _currentItem.PreviewMouseLeftButtonDown += (o, args) =>
-                {  //Code for removing elements from the draw area.
+                {  
                     if (_isRemoving)
                     {
                         _isRemoving = false;
@@ -182,6 +212,13 @@ namespace UI_Layout
         {
             DrawArea.ReleaseMouseCapture();
         }
+        private void DrawArea_OnDragOver(object sender, DragEventArgs e)
+        {
+            Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
+            Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
+        }
+        
+       
         /// ************************* METHOD *************************
         /// Method    : ResetButton_Click
         /// Arguments : object sender, RoutedEventArgs e
