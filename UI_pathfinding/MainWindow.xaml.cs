@@ -244,6 +244,56 @@ namespace UI_Layout
         {
             _isRemoving = true;
         }
+        private void DrawArea_OnPreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (!DrawArea.IsMouseCaptured)
+                return;
+
+            if (_isDragingRectangleSize)
+            {
+                Point location = e.MouseDevice.GetPosition(DrawArea);
+
+                double minX = Math.Min(location.X, anchorPoint.X);
+                double minY = Math.Min(location.Y, anchorPoint.Y);
+                double maxX = Math.Max(location.X, anchorPoint.X);
+                double maxY = Math.Max(location.Y, anchorPoint.Y);
+
+                Canvas.SetTop(_currentItem, minY);
+                Canvas.SetLeft(_currentItem, minX);
+
+                double height = maxY - minY;
+                double width = maxX - minX;
+
+                ((Rectangle)_currentItem).Height = Math.Abs(height);
+                ((Rectangle)_currentItem).Width = Math.Abs(width);
+
+
+
+
+            }
+        }
+        public List<RectangleData> getData()
+        {
+            var data = new List<RectangleData>();
+
+            foreach (UIElement drawAreaChild in DrawArea.Children)
+            {
+                if (((Rectangle)drawAreaChild).Tag == "Obstacle")
+                {
+                    double x1 = Canvas.GetLeft(drawAreaChild);
+                    double y1 = Canvas.GetTop(drawAreaChild);
+
+                    double x2 = x1 + ((Rectangle)drawAreaChild).Width;
+                    double y2 = y1 + ((Rectangle)drawAreaChild).Height;
+
+                    data.Add(new RectangleData(x1, y1, x2, y2));
+
+                    Console.WriteLine(x1 + ";" + y1 + "  " + x2 + ";" + y2);
+                }
+            }
+
+            return data;
+        }
         /// ************************* METHOD *************************
         /// Method    : GeneratePathButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -254,7 +304,7 @@ namespace UI_Layout
         /// coming, the A* algorith can be called/interacted within this button to take 
         /// co-ordinates of start, end and obstacle data ==> do the path generation ==>
         /// and send the co-ordinates of path points that the GUI can use to draw the line path.
-       
+
         private void GeneratePathButton_Click(object sender, RoutedEventArgs e)
         {
             //condition to verify if the start and end elements are not null
