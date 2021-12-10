@@ -1,19 +1,41 @@
-﻿using System;
+﻿///  Mech 540-A  :  Team-2 Project; Path finding using A* Algorithm
+///
+///  Name        :  Anna-Lee McLean
+///  Student ID  :  81058794
+///  Source file :  RRTAlgortihm.cs
+///  Purpose     :  Contains the RRTree class within the PathPlanning namespace. 
+///  Description :  Allows a (Rapidly Exploring Random Tree) RRT roadmap to be created as a list of Node objects including a start and goal node. 
+///                 Contains the CreateRRT(), GenerateNewSample(), CheckCollsionFree() and FindNearestNode() Methods. 
+///                             
+
+
+/// ****************************** USINGS ******************************
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
-using System.Windows;
 
 namespace PathPlanning
 {
-    // Returns: A generic list of nodes which make up the roadmap
+    /// ***************************** CLASSES *****************************
+    /// Class       : RRTree
+    /// Description : Creates a roadmap of Node objects which is searched by an A* Search algorithm 
+    ///               to find the shortest path in the roadmap to the goal node.
+    /// Methods     : 1. CreateRRT()
+    ///               2. GenerateNewSample()
+    ///               3. CheckCollsionFree()
+    ///               4. FindNearestNode()
+    
     class RRTree
     {
+        // ATTRIBUTES
+
         List<Node> roadmap;
         public Node start;
         public Node goal;
         public float stepSize;
         public int treeSize;
+
+        // CONSTRUCTOR
 
         public RRTree(Point start_, Point goal_, float stepSize_, int treeSize_)
         {
@@ -33,7 +55,11 @@ namespace PathPlanning
             //roadmap.AddLast(end);
         }
 
-        // ---------------------------------------------------------------------------------------------------------------------------------------
+        /// ******************************** METHOD ********************************
+        /// Method    : CreateRRT()
+        /// Arguments : 2 (RRTree, List<Rectangle>)
+        /// Returns   : None
+        /// This is the main method for the RRTree class which calls all other methods in the order required to create and search the roadmap
         public static void CreateRRT(RRTree T, List<Rectangle> obstacleList_)
         {
             while (T.roadmap.Count < T.treeSize)
@@ -53,7 +79,11 @@ namespace PathPlanning
 
         }
 
-        // ---------------------------------------------------------------------------------------------------------------------------------------
+        /// ******************************** METHOD ********************************
+        /// Method    : GenerateNewSample()
+        /// Arguments : 1 (RRTree)
+        /// Returns   : A list containing the new generated node and it's nearest neighbour node already in the roadmap (Node[])
+        /// This method calls the FindNearestNode() method to find the nearest neighbour node to the new generated sample
         public static Node[] GenerateNewSample(RRTree T_)
         {
             // Create x and y coords for a new sample between 0 and 5 (the dimensions of the environment)
@@ -76,7 +106,11 @@ namespace PathPlanning
             return nodeList;
         }
 
-        // ---------------------------------------------------------------------------------------------------------------------------------------
+        /// ******************************** METHOD ********************************
+        /// Method    : CheckCollisionFree()
+        /// Arguments : 2 (Node[], List<Rectangle>)
+        /// Returns   : bool
+        /// This method checks to see if the edge created between the new generated node and it's nearest node collides with any obstacles
         public static bool CheckCollisionFree(Node[] nodeList_, List<Rectangle> obstacleList_)
         {
             // Generate parametric equations for the line which connects the new node and it's nearest neighbour node
@@ -125,8 +159,11 @@ namespace PathPlanning
             return false;
         }
 
-        //----------------------------------------------------------------------------------------------------------------------------------------
-        // Find the nearest node in the roadmap of the tree T which is closest to the random sampled coordinate
+        /// ******************************** METHOD ********************************
+        /// Method    : FindNearestNode()
+        /// Arguments : 2 (RRTree, Node)
+        /// Returns   : The nearest node to the sampled node (Node)
+        /// This method finds the nearest node in the roadmap of the tree T which is closest to the random sampled node
         public static Node FindNearestNode(RRTree T_, Node sample_)
         {
             // Initialize a variable for the nearest node

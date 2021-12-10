@@ -1,13 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
+﻿///  Mech 540-A  :  Team-2 Project; Path finding using A* Algorithm
+///
+///  Name        :  Anna-Lee McLean
+///  Student ID  :  81058794
+///  Source file :  Node.cs
+///  Purpose     :  Contains the Node class within the PathPlanning namespace. Allows a node within an RRT roadmap to be created 
+///                 with (x,y) coordinates, it's parent node in the roadmap, and cost-to-goal parameters which will be used in the
+///                 A* Search method.
+///  Description :  Contains the EuclideanDistance() Method which calculates the straight-line distance between two nodes.
+///                 X and Y coordinates for the node must be declared when the class is instantiated.
+///                
+
+
+/// ****************************** USINGS ******************************
+using System;
 
 namespace PathPlanning
 {
-    // Represents a node in the RRT roadmap which has an x and y coordinate, a parent node, a past cost, an optimistic cost and an estimated cost
+    /// ***************************** CLASSES *****************************
+    /// Class       : Node
+    /// Description : Represents a node in the RRT roadmap which has an x and y coordinate, 
+    ///               a parent node, a past cost, a heurustic cost and an estimated cost.
+    /// Methods     : 1. EuclidenDistance()
+    
     class Node 
     {
+        // ATTRIBUTES
         public float X;
         public float Y;
         
@@ -20,10 +37,14 @@ namespace PathPlanning
         }
 
         // GETTERS AND SETTERS
-        public Node parent { get; set; }
-        public float cost { get; set; }
-        public float heuristic_cost { get; set; }
 
+        // Gets and Sets the node to which the instantiated node is connected to in the roadmap
+        public Node parent { get; set; }
+        // Gets and Sets the straight-line distance between the node and its parent
+        public float cost { get; set; }
+        // Gets and Sets the straight-line distance between the node and the goal node for the roadmap
+        public float heuristic_cost { get; set; }  
+        // Gets and Sets the estimated cost of travelling to the node 
         public float estimated_cost
         {
             get { return estimated_cost; }
@@ -33,8 +54,10 @@ namespace PathPlanning
             }
         }
 
-        // METHODS
-
+        /// ***************************** METHODS *****************************
+        /// Method    : EuclideanDistance()
+        /// Arguments : 1 (Node)
+        /// Returns   : The resulting straight-line distance (float)
 
         public float EuclideanDistance(Node node2)
         {
