@@ -6,7 +6,7 @@
 ///  Purpose     :  To create a GUI that can take user inputs for Start, End, Obstacles and show the generated path. 
 ///                 Contains UI-Layout namespace.
 ///  Description :  Contains classes 
-///                 1)MainWindow: Inherits from the Window class, Which is a form. Contains methods to activate button
+///                 MainWindow: Inherits from the Window class, Which is a form. Contains methods to activate button
 ///                   click, mouse click, mouse move, mouse down and mouse up for various buttons and draw area.
 ///
 
@@ -28,9 +28,6 @@ using System.Windows.Shapes;
 
 namespace UI_Layout
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     /// ************************* CLASSES *************************
     /// Class       : MainWindow
     /// Description : Inherits from Window class,Contains methods to activate button
@@ -43,7 +40,10 @@ namespace UI_Layout
 
         private bool _isDrawingStart = false;
         private bool _isDrawingEnd = false;
+        private bool _isDrawingRectangle = false;
         private bool _isRemoving = false;
+
+        private bool _isDragingRectangleSize = false;
 
         public Point? StartPoint = null;
         public Point? EndPoint = null;
@@ -73,6 +73,7 @@ namespace UI_Layout
         {
             _isDrawingStart = false;
             _isDrawingEnd = false;
+            _isDrawingRectangle = false;
 
         }
         /// ************************* METHOD *************************
@@ -98,17 +99,30 @@ namespace UI_Layout
             _isDrawingEnd = true;
         }
         /// ************************* METHOD *************************
+        /// Method    : DrawRectangleButton_Click
+        /// Arguments : object sender, RoutedEventArgs e
+        /// Returns   : Nothing
+        /// This method is a draw rctangle button click event, when the end button is 
+        /// clicked the drawing rectangle is enabled.
+        private void DrawRectangleButton_Click(object sender, RoutedEventArgs e)
+        {
+            CancelDrawing();
+            _isDrawingRectangle = true;
+        }
+        /// ************************* METHOD *************************
         /// Method    : DrawArea_OnPreviewMouseLeftButtonDown
         /// Arguments : object sender, MouseButtonEventArgs e
         /// Returns   : Nothing
         /// This method is for mouse leftbutton down with in the draw area 
         /// window, when mouse is clicked in the draw area, start point and end point
-        /// are generated as Green and Red rectangles.
+        /// are generated as Green and Red rectangles and obstacles are generated as
+        /// blue rectangles.
         private void DrawArea_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            //Code for creating start point and representing it as a green rectangle.
+            //If start button is clicked and there is no start point already specified in the draw area.
             if (_isDrawingStart && StartPoint == null)
             {
+                //Create a new rectangle object.
                 _currentItem = new Rectangle()
                 {
                     Width = 10,
@@ -116,18 +130,19 @@ namespace UI_Layout
                     Fill = new SolidColorBrush(Colors.Green),
                     Tag = "Start"
                 };
-
+                //Getting x and y co-ordinates of the object.
                 Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
                 Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
-
+                //Assiging the object as a StartPoint.
                 StartPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
 
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
             }
-            //Code for creating end point and representing it as a red rectangle.
+            //if end button clicked and there is no end point already in the draw area.
             if (_isDrawingEnd && EndPoint == null)
             {
+                //create a rectangle object.
                 _currentItem = new Rectangle()
                 {
                     Width = 10,
@@ -136,14 +151,32 @@ namespace UI_Layout
                     Tag = "End"
                 };
 
-
+                //Getting the x and y co-ordinates of the object.
                 Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
                 Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
-
+                //Assigning the object as EndPoint
                 EndPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
 
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
+            }
+            //if rectangle button is clicked
+            if (_isDrawingRectangle)
+            {
+                //Capturing mouse movements in the draw area.
+                DrawArea.CaptureMouse();
+                anchorPoint = e.MouseDevice.GetPosition(DrawArea);
+                //Creating new rectangle object.
+                _currentItem = new Rectangle()
+                {
+                    Fill = new SolidColorBrush(Colors.Blue),
+                    Tag = "Obstacle"
+                };
+
+                DrawArea.Children.Add(_currentItem);
+                CancelDrawing();
+
+                _isDragingRectangleSize = true;
             }
 
             //Panel.SetZIndex(_currentItem, -10);
@@ -161,8 +194,9 @@ namespace UI_Layout
                     }
                 };
 
+                //Code for removing elements from the draw area.
                 _currentItem.PreviewMouseLeftButtonDown += (o, args) =>
-                {  //Code for removing elements from the draw area.
+                {  
                     if (_isRemoving)
                     {
                         _isRemoving = false;
@@ -177,11 +211,24 @@ namespace UI_Layout
         /// Arguments : object sender, MouseButtonEventArgs e
         /// Returns   : Nothing
         /// This method is for mouse leftbutton up with in the draw area 
-        /// window, when mouseclick is released this event captures it.
+        /// window, when mouseclick is released triggers the release mouse capture event.
         private void DrawArea_OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            //Stops the rectangle painting in the draw area.
             DrawArea.ReleaseMouseCapture();
         }
+        /// ************************* METHOD *************************
+        /// Method    : DrawArea_OnDragOver
+        /// Arguments : object sender, DragEventArgs e
+        /// Returns   : Nothing
+        /// This method is collecting co-ordinates when mouse is dragged in the draw area.
+        private void DrawArea_OnDragOver(object sender, DragEventArgs e)
+        {
+            Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
+            Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
+        }
+        
+       
         /// ************************* METHOD *************************
         /// Method    : ResetButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -208,6 +255,66 @@ namespace UI_Layout
             _isRemoving = true;
         }
         /// ************************* METHOD *************************
+        /// Method    : DrawArea_OnPreviewMouseMove
+        /// Arguments : object sender, MouseEventArgs e
+        /// Returns   : Nothing
+        /// This method is for collecting the co-ordinates of the rectangles in the draw area drawn by dragging.
+        private void DrawArea_OnPreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            //if mousecaptures inside draw area is false
+            if (!DrawArea.IsMouseCaptured)
+                return;
+            //The rectangle button is clicked and mouse is clicked within the draw area
+            if (_isDragingRectangleSize)
+            {
+                //Collecting co-ordinates of the rectangle and allocating them to heigth and width of rectangle.
+                Point location = e.MouseDevice.GetPosition(DrawArea);
+
+                double minX = Math.Min(location.X, anchorPoint.X);
+                double minY = Math.Min(location.Y, anchorPoint.Y);
+                double maxX = Math.Max(location.X, anchorPoint.X);
+                double maxY = Math.Max(location.Y, anchorPoint.Y);
+
+                Canvas.SetTop(_currentItem, minY);
+                Canvas.SetLeft(_currentItem, minX);
+
+                double height = maxY - minY;
+                double width = maxX - minX;
+
+                ((Rectangle)_currentItem).Height = Math.Abs(height);
+                ((Rectangle)_currentItem).Width = Math.Abs(width);
+
+
+            }
+        }
+        /// ************************* METHOD *************************
+        /// Method    : getData()
+        /// Arguments : None
+        /// Returns   : data (list of obstacle co-ordinates)
+        /// This method is for creating a list of co-ordinates of the obstacles.
+        public List<RectangleData> getData()
+        {
+            var data = new List<RectangleData>();
+
+            foreach (UIElement drawAreaChild in DrawArea.Children)
+            {
+                if (((Rectangle)drawAreaChild).Tag == "Obstacle")
+                {
+                    double x1 = Canvas.GetLeft(drawAreaChild);
+                    double y1 = Canvas.GetTop(drawAreaChild);
+
+                    double x2 = x1 + ((Rectangle)drawAreaChild).Width;
+                    double y2 = y1 + ((Rectangle)drawAreaChild).Height;
+
+                    data.Add(new RectangleData(x1, y1, x2, y2));
+
+                    Console.WriteLine(x1 + ";" + y1 + "  " + x2 + ";" + y2);
+                }
+            }
+
+            return data;
+        }
+        /// ************************* METHOD *************************
         /// Method    : GeneratePathButton_Click
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
@@ -217,7 +324,7 @@ namespace UI_Layout
         /// coming, the A* algorith can be called/interacted within this button to take 
         /// co-ordinates of start, end and obstacle data ==> do the path generation ==>
         /// and send the co-ordinates of path points that the GUI can use to draw the line path.
-       
+
         private void GeneratePathButton_Click(object sender, RoutedEventArgs e)
         {
             //condition to verify if the start and end elements are not null
@@ -230,7 +337,10 @@ namespace UI_Layout
 
             Console.WriteLine(EndPoint);
 
-           // put your A* here
+            //Get the list of obstacles
+            getData();
+
+            // put your A* here
         }
     }
 }
