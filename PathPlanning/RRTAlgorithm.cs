@@ -29,7 +29,7 @@ namespace PathPlanning
     {
         // ATTRIBUTES
 
-        List<Node> roadmap;
+        public List<Node> roadmap;
         public Node start;
         public Node goal;
         public float stepSize;
@@ -60,17 +60,25 @@ namespace PathPlanning
         /// Arguments : 2 (RRTree, List<Rectangle>)
         /// Returns   : None
         /// This is the main method for the RRTree class which calls all other methods in the order required to create and search the roadmap
-        public static void CreateRRT(RRTree T, List<Rectangle> obstacleList_)
+        public void CreateRRT(List<Rectangle> obstacleList_)
         {
-            while (T.roadmap.Count < T.treeSize)
+            while (roadmap.Count < treeSize)
             {
-                Node[] nodeList = GenerateNewSample(T);
-                // The method above returns a list of 2 nodes which overwrites the initailized variable and is passed to the method below.
+                Node[] nodeList = GenerateNewSample();
 
                 if (CheckCollisionFree(nodeList, obstacleList_))
                 {
                     // DrawEdge();
-                    T.roadmap.Add(nodeList[1]);
+                    roadmap.Add(nodeList[1]);
+
+                    // If the new node is within range of the goal node, complete the roadmap
+                    if (nodeList[1].EuclideanDistance(goal) < stepSize)
+                    {
+                        goal.parent = nodeList[1];
+                        roadmap.Add(goal);
+                        //DrawEgde (between newNode (nodeList[1]) and goal)
+                        break;
+                    }
                     
                 }
             }
@@ -84,20 +92,20 @@ namespace PathPlanning
         /// Arguments : 1 (RRTree)
         /// Returns   : A list containing the new generated node and it's nearest neighbour node already in the roadmap (Node[])
         /// This method calls the FindNearestNode() method to find the nearest neighbour node to the new generated sample
-        public static Node[] GenerateNewSample(RRTree T_)
+        public Node[] GenerateNewSample()
         {
             // Create x and y coords for a new sample between 0 and 5 (the dimensions of the environment)
             // Sample a random coordinate (node) in the environment
-            Random randomFloat = new Random();
-            float xSample = (float)(randomFloat.NextDouble() * 5);    
-            float ySample = (float)(randomFloat.NextDouble() * 5);
+            Random randomInt = new Random();
+            int xSample = randomInt.Next(-5, 5);    
+            int ySample = randomInt.Next(-5, 5);
             Node sample = new Node(xSample, ySample);
 
-            Node nearestNode = FindNearestNode(T_, sample);
+            Node nearestNode = FindNearestNode(sample);
 
             // Generate a new node that creates a vector from the nearest node to the random sample but is the length of stepSize.
-            float xNew = nearestNode.X + (((xSample - nearestNode.X) * T_.stepSize) / nearestNode.cost);
-            float yNew = nearestNode.Y + (((ySample - nearestNode.Y) * T_.stepSize) / nearestNode.cost);
+            int xNew = (int)(nearestNode.X + ((xSample - nearestNode.X) * stepSize) / (sample.EuclideanDistance(nearestNode)));
+            int yNew = (int)(nearestNode.Y + ((ySample - nearestNode.Y) * stepSize) / (sample.EuclideanDistance(nearestNode)));
             Node newNode = new Node(xNew, yNew);    
 
             // Store the new node and it's parent node in a list to be returned 
@@ -164,7 +172,7 @@ namespace PathPlanning
         /// Arguments : 2 (RRTree, Node)
         /// Returns   : The nearest node to the sampled node (Node)
         /// This method finds the nearest node in the roadmap of the tree T which is closest to the random sampled node
-        public static Node FindNearestNode(RRTree T_, Node sample_)
+        private Node FindNearestNode(Node sample_)
         {
             // Initialize a variable for the nearest node
             Node nearestNode = new Node(0, 0);
@@ -172,19 +180,31 @@ namespace PathPlanning
             // Initialize a variable for the distance between the sample node and its nearest neighbour node
             float minDistance = float.PositiveInfinity;
 
-            foreach (Node node in T_.roadmap)
+            foreach (Node node in roadmap)
             {
                 float distance = node.EuclideanDistance(sample_);
                 if (distance < minDistance)
                 {
                     minDistance = distance;
                     nearestNode = node;
-                    nearestNode.cost = minDistance;
+                    //nearestNode.cost = minDistance;
                 }
             }
 
             return nearestNode;
         }
+
+        /// ******************************** METHOD ********************************
+        /// Method    : AStarSearch()
+        /// Arguments : 2 (RRTree, Node)
+        /// Returns   : The nearest node to the sampled node (Node)
+        /// This method finds the nearest node in the roadmap of the tree T which is closest to the random sampled node
+        /// 
+        public List<Node> AStarSearch()
+        {
+
+        }
+
 
     }
 }
