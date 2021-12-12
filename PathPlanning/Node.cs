@@ -20,16 +20,16 @@ namespace PathPlanning
     /// Class       : Node
     /// Description : Represents a node in the RRT roadmap which has an x and y coordinate, 
     ///               a parent node, a past cost, a heurustic cost and an estimated cost.
-    /// Methods     : 1. EuclidenDistance()
+    /// Methods     : 1. EuclideanDistance()
     
     class Node 
     {
         // ATTRIBUTES
-        public float X;
-        public float Y;
+        public int X;
+        public int Y;
         
         // CONSTRUCTOR
-        public Node(float X_, float Y_)
+        public Node(int X_, int Y_)
         {
             X = X_;
             Y = Y_;
@@ -58,11 +58,20 @@ namespace PathPlanning
         /// Method    : EuclideanDistance()
         /// Arguments : 1 (Node)
         /// Returns   : The resulting straight-line distance (float)
-
+        
         public float EuclideanDistance(Node node2)
         {
-            float distance = (float)Math.Sqrt(Math.Pow(this.X - node2.X, 2) + Math.Pow(this.Y - node2.Y, 2));
+            float distance = (float)Math.Sqrt(Math.Pow(X - node2.X, 2) + Math.Pow(Y - node2.Y, 2));
             return distance;
+        }
+
+        public bool Equals(Node node2)
+        {
+            if ((X == node2.X) && (Y == node2.Y))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
