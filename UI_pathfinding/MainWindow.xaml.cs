@@ -26,6 +26,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Xceed.Wpf.AvalonDock.Layout;
+using PathPlanning;
 
 namespace UI_Layout
 {
@@ -49,6 +50,8 @@ namespace UI_Layout
         public Point? StartPoint = null;
         public Point? EndPoint = null;
 
+        public static double window_height;
+        public static double window_width;
         /// ************************* METHOD *************************
         /// Method    : MainWindow
         /// Arguments : None
@@ -57,9 +60,11 @@ namespace UI_Layout
         public MainWindow()
         {
             InitializeComponent();
+            window_height = DrawArea.ActualHeight;
+            window_width = DrawArea.ActualWidth;
             //CompositionTarget.Rendering += OnRendering;
         }
-
+       
         /* private void OnRendering(object sender, EventArgs e)
          {
 
@@ -202,6 +207,7 @@ namespace UI_Layout
                     {
                         _isRemoving = false;
                         DrawArea.Children.Remove((UIElement)o);
+
                     }
                 };
             }
@@ -352,6 +358,8 @@ namespace UI_Layout
             List<RectangleData> data= getData();
             Console.WriteLine(data[0].X1);
 
+            RRTree tree = new RRTree((Point)(StartPoint), (Point)(EndPoint));
+            List<Node> finalPath = tree.CreateAndSearchRRT(data);
 
             CreateAPolyline();
 

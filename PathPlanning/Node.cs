@@ -25,11 +25,11 @@ namespace PathPlanning
     class Node 
     {
         // ATTRIBUTES
-        public int X;
-        public int Y;
+        public double X;
+        public double Y;
         
         // CONSTRUCTOR
-        public Node(int X_, int Y_)
+        public Node(double X_, double Y_)
         {
             X = X_;
             Y = Y_;

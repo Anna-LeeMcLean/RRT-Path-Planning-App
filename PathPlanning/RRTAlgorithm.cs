@@ -13,7 +13,8 @@
 /// ****************************** USINGS ******************************
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows;
+using UI_Layout;
 
 namespace PathPlanning
 {
@@ -50,16 +51,16 @@ namespace PathPlanning
             //stepSize = stepSize_;
 
             // Initialize RRT with start and end coordinates
-            List<Node> roadmap = new List<Node>();
+            //List<Node> roadmap = new List<Node>();
             roadmap.Add(start);
         }
 
         /// ******************************** METHOD ********************************
-        /// Method    : CreateandSearchRRT()
+        /// Method    : CreateAndSearchRRT()
         /// Arguments : 2 (RRTree, List<Rectangle>)
         /// Returns   : None
         /// This is the main method for the RRTree class which calls all other methods in the order required to create and search the roadmap
-        public List<Node> CreateAndSearchRRT(List<Rectangle> obstacleList_)
+        public List<Node> CreateAndSearchRRT(List<RectangleData> obstacleList_)
         {
             while (!goalAddedToRoadmap)
             {
@@ -96,9 +97,9 @@ namespace PathPlanning
         {
             // Create x and y coords for a new sample between 0 and 5 (the dimensions of the environment)
             // Sample a random coordinate (node) in the environment
-            Random randomInt = new Random();
-            int xSample = randomInt.Next(-5, 5);    
-            int ySample = randomInt.Next(-5, 5);
+            Random randomDouble = new Random();
+            double xSample = randomDouble.NextDouble() * MainWindow.window_height;
+            double ySample = randomDouble.NextDouble() * MainWindow.window_width;
             Node sample = new Node(xSample, ySample);
 
             Node nearestNode = FindNearestNode(sample);
@@ -119,37 +120,37 @@ namespace PathPlanning
         /// Arguments : 2 (Node[], List<Rectangle>)
         /// Returns   : bool
         /// This method checks to see if the edge created between the new generated node and it's nearest node collides with any obstacles
-        private static bool CheckCollisionFree(Node[] nodeList_, List<Rectangle> obstacleList_)
+        private static bool CheckCollisionFree(Node[] nodeList_, List<RectangleData> obstacleList_)
         {
             // Generate parametric equations for the line which connects the new node and it's nearest neighbour node
 
-            float dx1 = nodeList_[1].X - nodeList_[0].X; // change in x for the new and nearest nodes
-            float dy1 = nodeList_[1].Y - nodeList_[0].Y; // change in y for the new and nearest nodes
+            double dx1 = nodeList_[1].X - nodeList_[0].X; // change in x for the new and nearest nodes
+            double dy1 = nodeList_[1].Y - nodeList_[0].Y; // change in y for the new and nearest nodes
 
-            foreach (Rectangle obstacle in obstacleList_)
+            foreach (RectangleData obstacle in obstacleList_)
             {
                 // Generate coordinates for each of the four lines which make up the rectangle: { xstart, ystart, xend, yend }
 
-                int[] topLine = { obstacle.Left, obstacle.Top, obstacle.Right, obstacle.Top };
-                int[] bottomLine = { obstacle.Left, obstacle.Bottom, obstacle.Right, obstacle.Bottom };
-                int[] leftLine = { obstacle.Left, obstacle.Bottom, obstacle.Left, obstacle.Top };
-                int[] rightline = { obstacle.Right, obstacle.Bottom, obstacle.Right, obstacle.Top };
+                double[] topLine = { obstacle.X1, obstacle.Y1, obstacle.X2, obstacle.Y2 };
+                double[] bottomLine = { obstacle.X3, obstacle.Y3, obstacle.X4, obstacle.Y4 };
+                double[] leftLine = { obstacle.X3, obstacle.Y3, obstacle.X1, obstacle.Y1 };
+                double[] rightline = { obstacle.X4, obstacle.Y4, obstacle.X2, obstacle.Y2 };
 
                 // Add lines to a generic list so we can iterate through each line
-                List<int[]> rectangleLines = new List<int[]>();
+                List<double[]> rectangleLines = new List<double[]>();
 
                 rectangleLines.Add(topLine); rectangleLines.Add(bottomLine);
                 rectangleLines.Add(rightline); rectangleLines.Add(leftLine);
 
                 // Initialize parametric variables t1 and t2
-                float t1 = 0; float t2 = 0;
+                double t1 = 0; double t2 = 0;
                 
-                foreach (int[] line in rectangleLines)
+                foreach (double[] line in rectangleLines)
                 {
-                    float dx2 = line[2] - line[0];
-                    float dy2 = line[3] - line[1];
+                    double dx2 = line[2] - line[0];
+                    double dy2 = line[3] - line[1];
 
-                    float denominator = dy1 * dx2 - dx1 * dy2;
+                    double denominator = dy1 * dx2 - dx1 * dy2;
                     t1 = ((nodeList_[0].X - line[0]) * dy2 + (line[1] - nodeList_[0].Y) * dx2) / denominator;
                     t2 = ((line[0] - nodeList_[0].X) * dy1 + (nodeList_[0].Y - line[1]) * dx1)/ -denominator;
 
