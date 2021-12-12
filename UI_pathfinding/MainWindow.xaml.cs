@@ -25,6 +25,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Xceed.Wpf.AvalonDock.Layout;
 
 namespace UI_Layout
 {
@@ -183,7 +184,7 @@ namespace UI_Layout
 
             //If the draw area has any element in it, this code allows user to move those elements
             //aorund as he wants. He can move start point, end point and obstacles in the draw area.
-            if (_currentItem != null) 
+            if (_currentItem != null)
             {
                 _currentItem.PreviewMouseMove += (s, args) =>
                 {
@@ -196,7 +197,7 @@ namespace UI_Layout
 
                 //Code for removing elements from the draw area.
                 _currentItem.PreviewMouseLeftButtonDown += (o, args) =>
-                {  
+                {
                     if (_isRemoving)
                     {
                         _isRemoving = false;
@@ -204,7 +205,7 @@ namespace UI_Layout
                     }
                 };
             }
-            
+
         }
         /// ************************* METHOD *************************
         /// Method    : DrawArea_OnPreviewMouseLeftButtonUp
@@ -227,8 +228,8 @@ namespace UI_Layout
             Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
             Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
         }
-        
-       
+
+
         /// ************************* METHOD *************************
         /// Method    : ResetButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -295,7 +296,7 @@ namespace UI_Layout
         public List<RectangleData> getData()
         {
             var data = new List<RectangleData>();
-
+            string temp = "";
             foreach (UIElement drawAreaChild in DrawArea.Children)
             {
                 if (((Rectangle)drawAreaChild).Tag == "Obstacle")
@@ -304,16 +305,25 @@ namespace UI_Layout
                     double y1 = Canvas.GetTop(drawAreaChild);
 
                     double x2 = x1 + ((Rectangle)drawAreaChild).Width;
-                    double y2 = y1 + ((Rectangle)drawAreaChild).Height;
+                    double y2 = y1;
 
-                    data.Add(new RectangleData(x1, y1, x2, y2));
+                    double x3 = x1;
+                    double y3 = y1 + ((Rectangle)drawAreaChild).Height;
 
+                    double x4 = x1 + ((Rectangle)drawAreaChild).Width;
+                    double y4 = y1 + ((Rectangle)drawAreaChild).Height; 
+
+                    data.Add(new RectangleData(x1, y1, x2, y2,x3,y3,x4,y4));
+
+                   //MessageBox.Show(string.Format("{0},{1},{2},{3} ", x1,y1,x2,y2), "Co-Ordinates of obstacles");
                     Console.WriteLine(x1 + ";" + y1 + "  " + x2 + ";" + y2);
-                }
+                    temp += "(" + x1 + "," + y1 + ") (" + x2 + "," + y2 + ") (" + x3 + "," + y3 + ") (" + x4 + "," + y4 + ")";
+                }  
             }
-
+            MessageBox.Show(temp,"co-ordinates of rectangle obstacles");
             return data;
         }
+        
         /// ************************* METHOD *************************
         /// Method    : GeneratePathButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -333,14 +343,47 @@ namespace UI_Layout
                 return;
             }
 
-            Console.WriteLine(StartPoint);
-
-            Console.WriteLine(EndPoint);
+            //Console.WriteLine(StartPoint);
+            MessageBox.Show(StartPoint.ToString(), "Co-ordinates of start point");
+            MessageBox.Show(EndPoint.ToString(), "Co-ordinates of end point");
+            //Console.WriteLine(EndPoint);
 
             //Get the list of obstacles
-            getData();
+            List<RectangleData> data= getData();
+            Console.WriteLine(data[0].X1);
+
+
+            CreateAPolyline();
 
             // put your A* here
+        }
+        private void CreateAPolyline()
+        {
+            // Create a blue and a black Brush  
+            SolidColorBrush yellowBrush = new SolidColorBrush();
+            yellowBrush.Color = Colors.Yellow;
+            SolidColorBrush blackBrush = new SolidColorBrush();
+            blackBrush.Color = Colors.Black;
+            // Create a polyline  
+            Polyline yellowPolyline = new Polyline();
+            yellowPolyline.Stroke = blackBrush;
+            yellowPolyline.StrokeThickness = 4;
+            // Create a collection of points for a polyline  
+            System.Windows.Point Point1 = new System.Windows.Point(10, 100);
+            System.Windows.Point Point2 = new System.Windows.Point(100, 200);
+            System.Windows.Point Point3 = new System.Windows.Point(200, 30);
+            System.Windows.Point Point4 = new System.Windows.Point(250, 200);
+            System.Windows.Point Point5 = new System.Windows.Point(200, 150);
+            PointCollection polygonPoints = new PointCollection();
+            polygonPoints.Add(Point1);
+            polygonPoints.Add(Point2);
+            polygonPoints.Add(Point3);
+            polygonPoints.Add(Point4);
+            polygonPoints.Add(Point5);
+            // Set Polyline.Points properties  
+            yellowPolyline.Points = polygonPoints;
+            // Add polyline to the page  
+            DrawArea.Children.Add(yellowPolyline);
         }
     }
 }
