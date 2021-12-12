@@ -6,7 +6,8 @@
 ///  Purpose     :  Contains the RRTree class within the PathPlanning namespace. 
 ///  Description :  Allows a (Rapidly Exploring Random Tree) RRT roadmap to be created as a list of Node objects including a start and goal node. 
 ///                 Contains the public CreateRRT() method which is the main function for the class called when the user clicks the 'Generate button'.
-///                 Also contains the private GenerateNewSample(), CheckCollsionFree() and FindNearestNode() methods which are called by the CreateRRT() method.
+///                 Also contains the private GenerateNewSample(), CheckCollsionFree(), FindNearestNode() and ReturnPath() methods which are called 
+///                 by the CreateRRT() method.
 ///                             
 
 
@@ -25,6 +26,7 @@ namespace PathPlanning
     ///               2. GenerateNewSample()
     ///               3. CheckCollsionFree()
     ///               4. FindNearestNode()
+    ///               5. ReturnPath()
     
     class RRTree
     {
@@ -40,9 +42,11 @@ namespace PathPlanning
 
         public RRTree(Point start_, Point goal_)
         {
-            Node start = new Node(start_.X, start_.Y);
+            start.X = start_.X;
+            start.Y = start_.Y;
             start.cost = 0;
-            Node goal = new Node(goal_.X, goal_.Y);
+            goal.X = goal_.X;
+            goal.Y = goal_.Y;
 
             float start_heuristic_cost = start.EuclideanDistance(goal);
             start.heuristic_cost = start_heuristic_cost;
@@ -83,7 +87,18 @@ namespace PathPlanning
                 }
             }
 
+            // Returns the list of nodes which make up the path
             List<Node> path = ReturnPath();
+
+            // Get the length of the path
+            float finalDistance = 0;
+            foreach (Node node in path)
+            {
+                finalDistance = finalDistance + node.cost;
+            }
+
+            // Find some way to return the final distance to the GUI window too. Maybe a tuple.
+
             return path;
         }
 
@@ -162,7 +177,8 @@ namespace PathPlanning
                     nodeList_[1].parent = nodeList_[0];
                     // Set the new node's cost as the cost of the parent node + cost between new node and nearest node
                     // Maybe this might just be the cost between the new node and nearest node. Gonna see after A* Search is implemented.
-                    nodeList_[1].cost = nodeList_[0].cost + nodeList_[1].EuclideanDistance(nodeList_[0]);
+                    // Update for thestatement above.. it was. [+ nodeList_[1].EuclideanDistance(nodeList_[0])]
+                    nodeList_[1].cost = nodeList_[0].cost;
                     return true; 
                 }
 
