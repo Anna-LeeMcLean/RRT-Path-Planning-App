@@ -14,7 +14,6 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using UI_Layout;
 
 namespace PathPlanning
@@ -27,6 +26,7 @@ namespace PathPlanning
     ///               2. GenerateNewSample()
     ///               3. CheckCollsionFree()
     ///               4. FindNearestNode()
+    ///               5. ReturnPath()
     
     class RRTree
     {
@@ -223,6 +223,23 @@ namespace PathPlanning
             }
 
             return finalPath;
+        }
+
+        /// ******************************** METHOD ********************************
+        /// Method    : ReturnFinalDistanceTravelled()
+        /// Arguments : 1 (List<Node>)
+        /// Returns   : The distance travelled from the start node to goal node (float)
+        /// 
+        public float ReturnFinalDistanceTravelled(List<Node> nodeList_)
+        {
+            float finalDistance = 0;
+
+            foreach (Node node in nodeList_)
+            {
+                finalDistance = finalDistance + node.cost;
+            }
+
+            return finalDistance;
         }
     }
 }
