@@ -64,10 +64,6 @@ namespace PathPlanning
 
                 if (CheckCollisionFree(nodeList, obstacleList_))
                 {
-                    //mainWindow.CreateCircle(nodeList[0]);
-                    //mainWindow.CreateCircle(nodeList[1]);
-                    //mainWindow.CreateAPolyline(nodeList);
-                    
                     roadmap.Add(nodeList[1]);
 
                     // If the new node is within range of the goal node, complete the roadmap
@@ -77,7 +73,6 @@ namespace PathPlanning
                         goal.parent = nodeList[1];
                         roadmap.Add(goal);
                         goalAddedToRoadmap = true;
-                        //DrawEgde (between newNode (nodeList[1]) and goal)
                         break;
                     }
                     
@@ -95,12 +90,10 @@ namespace PathPlanning
         /// This method calls the FindNearestNode() method to find the nearest neighbour node to the new generated sample
         private Node[] GenerateNewSample()
         {
-            // Create x and y coords for a new sample between 0 and 5 (the dimensions of the environment)
+            // Create x and y coords for a new sample between 700 and 350 (the dimensions of the environment)
             // Sample a random coordinate (node) in the environment
             Random randomDouble = new Random();
-            //double xSample = randomDouble.NextDouble() * MainWindow.window_height;
-            //double ySample = randomDouble.NextDouble() * MainWindow.window_width;
-            double xSample = randomDouble.NextDouble() * 800;
+            double xSample = randomDouble.NextDouble() * 650;
             double ySample = randomDouble.NextDouble() * 350;
             Node sample = new Node(xSample, ySample);
 
