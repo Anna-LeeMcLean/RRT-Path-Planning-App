@@ -50,8 +50,6 @@ namespace UI_Layout
         public Point? StartPoint = null;
         public Point? EndPoint = null;
 
-        public static double window_height;
-        public static double window_width;
         /// ************************* METHOD *************************
         /// Method    : MainWindow
         /// Arguments : None
@@ -60,8 +58,6 @@ namespace UI_Layout
         public MainWindow()
         {
             InitializeComponent();
-            window_height = DrawArea.ActualHeight;
-            window_width = DrawArea.ActualWidth;
             //CompositionTarget.Rendering += OnRendering;
         }
        
@@ -206,6 +202,15 @@ namespace UI_Layout
                 {
                     if (_isRemoving)
                     {
+                        if (((Rectangle)o).Tag == "End")
+                        {
+                            EndPoint = null;
+                        }
+
+                        if (((Rectangle)o).Tag == "Start")
+                        {
+                            StartPoint = null;
+                        }
                         _isRemoving = false;
                         DrawArea.Children.Remove((UIElement)o);
 
@@ -234,6 +239,17 @@ namespace UI_Layout
         {
             Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
             Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
+
+
+            if (((Rectangle)_currentItem).Tag == "End")
+            {
+                EndPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
+            }
+
+            if (((Rectangle)_currentItem).Tag == "Start")
+            {
+                StartPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
+            }
         }
 
 
@@ -300,7 +316,7 @@ namespace UI_Layout
         /// Arguments : None
         /// Returns   : data (list of obstacle co-ordinates)
         /// This method is for creating a list of co-ordinates of the obstacles.
-        public List<RectangleData> getData()
+        public List<RectangleData> getRectangleData()
         {
             var data = new List<RectangleData>();
             string temp = "";
@@ -344,43 +360,25 @@ namespace UI_Layout
 
         private void GeneratePathButton_Click(object sender, RoutedEventArgs e)
         {
-           
-            //foreach (UIElement drawAreaChild in DrawArea.Children)
-            //{
-            //    if ((((Rectangle)drawAreaChild).Tag == "Start") && (((Rectangle)drawAreaChild).Tag == "End"))
-            //    {
-            //        break;
-            //    }
-            //    if (!(((Rectangle)drawAreaChild).Tag == "Start"))
-            //    {
-            //        StartPoint = null;
-            //        _isDrawingStart = true;
-            //    }
-            //    else if (!(((Rectangle)drawAreaChild).Tag == "End"))
-            //    {
-            //        EndPoint = null;
-            //        _isDrawingEnd = true;
-            //    }
-            //}
-            //if (StartPoint == null && EndPoint==null)
-            //{
-            //    return;
-            //}
+            if (StartPoint == null || EndPoint == null)
+            {
+                return;
+            }
 
             MessageBox.Show(StartPoint.ToString(), "Co-ordinates of start point");
             MessageBox.Show(EndPoint.ToString(), "Co-ordinates of end point");
 
             //Get the list of obstacles
             // Do this only if the rectangle list is not empty
-            List<RectangleData> data = getData();
+            List<RectangleData> data = getRectangleData();
 
             RRTree tree = new RRTree((Point)StartPoint, (Point)EndPoint);
             List<Node> finalPath = tree.CreateAndSearchRRT(data);
 
-            foreach (Node node in finalPath)
-            {
-                CreateCircle(node);
-            }
+            //foreach (Node node in finalPath)
+            //{
+            //    CreateCircle(node);
+            //}
 
             MessageBox.Show("Path Found!");
 
@@ -407,6 +405,15 @@ namespace UI_Layout
             Point Point1 = new Point(list_1[0].X,list_1[0].Y);
             Point Point2 = new Point(list_1[1].X,list_1[1].Y);
 
+            foreach (Node node in list_1)
+            {
+
+            }
+            Canvas.SetLeft(circle1, node.X);
+            Canvas.SetTop(circle1, node.Y);
+
+            DrawArea.Children.Add(circle1);
+
             PointCollection polygonPoints = new PointCollection();
             polygonPoints.Add(Point1);
             polygonPoints.Add(Point2);
@@ -416,8 +423,9 @@ namespace UI_Layout
             // Add polyline to the page  
             DrawArea.Children.Add(polyline);
         }
-        public void CreateCircle(Node node)
+        public void Createpath(List<Node> list_1)
         {
+            
             var circle1 = new Ellipse()
             {
                 Fill = new SolidColorBrush(Colors.Black),
