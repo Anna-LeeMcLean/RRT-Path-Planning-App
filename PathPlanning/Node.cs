@@ -1,17 +1,16 @@
-﻿///  Mech 540-A  :  Team-2 Project; Path finding using A* Algorithm
+﻿///  Mech 540-A  :  Team-2 Project; Path finding using RRT Algorithm
 ///
 ///  Name        :  Anna-Lee McLean
 ///  Student ID  :  81058794
 ///  Source file :  Node.cs
 ///  Purpose     :  Contains the Node class within the PathPlanning namespace. Allows a node within an RRT roadmap to be created 
-///                 with (x,y) coordinates, it's parent node in the roadmap, and cost-to-goal parameters which will be used in the
-///                 A* Search method.
+///                 with (x,y) coordinates, it's parent node in the roadmap, and cost-to-goal distance.
 ///  Description :  Contains the EuclideanDistance() Method which calculates the straight-line distance between two nodes.
 ///                 X and Y coordinates for the node must be declared when the class is instantiated.
 ///                
 
 
-/// ****************************** USINGS ******************************
+/// ******************************* USINGS ********************************
 using System;
 
 namespace PathPlanning
@@ -19,8 +18,9 @@ namespace PathPlanning
     /// ***************************** CLASSES *****************************
     /// Class       : Node
     /// Description : Represents a node in the RRT roadmap which has an x and y coordinate, 
-    ///               a parent node, a past cost, a heurustic cost and an estimated cost.
+    ///               a parent node and a cost to be travelled.
     /// Methods     : 1. EuclideanDistance()
+    /// 
     
     public class Node 
     {
