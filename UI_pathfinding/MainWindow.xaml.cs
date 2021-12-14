@@ -86,7 +86,7 @@ namespace UI_Layout
         /// Method    : StartButton_Click
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
-        /// This method is a start button click event, when the start button 
+        /// This method is a start point button click event, when the start button 
         /// is clicked the start point drawing is enabled.
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
@@ -97,7 +97,7 @@ namespace UI_Layout
         /// Method    : EndButton_Click
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
-        /// This method is a end button click event, when the end button is 
+        /// This method is a end point button click event, when the end button is 
         /// clicked the end point drawing is enabled.
         private void EndButton_Click(object sender, RoutedEventArgs e)
         {
@@ -141,9 +141,9 @@ namespace UI_Layout
                 Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
                 //Assiging the object as a StartPoint.
                 StartPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
-
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
+                
             }
             //if end button clicked and there is no end point already in the draw area.
             if (_isDrawingEnd && EndPoint == null)
@@ -165,6 +165,7 @@ namespace UI_Layout
 
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
+                
             }
             //if rectangle button is clicked
             if (_isDrawingRectangle)
@@ -326,7 +327,7 @@ namespace UI_Layout
                     temp += "(" + x1 + "," + y1 + ") (" + x2 + "," + y2 + ") (" + x3 + "," + y3 + ") (" + x4 + "," + y4 + ")";
                 }  
             }
-            MessageBox.Show(temp,"co-ordinates of rectangle obstacles");
+            MessageBox.Show(temp,"Co-ordinates of Rectangle Obstacles");
             return data;
         }
         
@@ -343,55 +344,91 @@ namespace UI_Layout
 
         private void GeneratePathButton_Click(object sender, RoutedEventArgs e)
         {
-            //condition to verify if the start and end elements are not null
-            if (StartPoint == null && EndPoint == null)
-            {
-                return;
-            }
+           
+            //foreach (UIElement drawAreaChild in DrawArea.Children)
+            //{
+            //    if ((((Rectangle)drawAreaChild).Tag == "Start") && (((Rectangle)drawAreaChild).Tag == "End"))
+            //    {
+            //        break;
+            //    }
+            //    if (!(((Rectangle)drawAreaChild).Tag == "Start"))
+            //    {
+            //        StartPoint = null;
+            //        _isDrawingStart = true;
+            //    }
+            //    else if (!(((Rectangle)drawAreaChild).Tag == "End"))
+            //    {
+            //        EndPoint = null;
+            //        _isDrawingEnd = true;
+            //    }
+            //}
+            //if (StartPoint == null && EndPoint==null)
+            //{
+            //    return;
+            //}
 
-            //Console.WriteLine(StartPoint);
             MessageBox.Show(StartPoint.ToString(), "Co-ordinates of start point");
             MessageBox.Show(EndPoint.ToString(), "Co-ordinates of end point");
-            //Console.WriteLine(EndPoint);
 
             //Get the list of obstacles
-            List<RectangleData> data= getData();
-            Console.WriteLine(data[0].X1);
+            // Do this only if the rectangle list is not empty
+            List<RectangleData> data = getData();
 
-            RRTree tree = new RRTree((Point)(StartPoint), (Point)(EndPoint));
+            RRTree tree = new RRTree((Point)StartPoint, (Point)EndPoint);
             List<Node> finalPath = tree.CreateAndSearchRRT(data);
 
-            CreateAPolyline();
+            foreach (Node node in finalPath)
+            {
+                CreateCircle(node);
+            }
+
+            MessageBox.Show("Path Found!");
+
 
             // put your A* here
+            //condition to verify if the start and end elements are not null
+            /* 
+             else if(StartPoint != null && EndPoint != null)
+             {
+
+             }*/
+
+
         }
-        private void CreateAPolyline()
+        public void CreatePolyline(Node[] list_1)
         {
-            // Create a blue and a black Brush  
-            SolidColorBrush yellowBrush = new SolidColorBrush();
-            yellowBrush.Color = Colors.Yellow;
             SolidColorBrush blackBrush = new SolidColorBrush();
             blackBrush.Color = Colors.Black;
             // Create a polyline  
-            Polyline yellowPolyline = new Polyline();
-            yellowPolyline.Stroke = blackBrush;
-            yellowPolyline.StrokeThickness = 4;
+            Polyline polyline = new Polyline();
+            polyline.Stroke = blackBrush;
+            polyline.StrokeThickness = 4;
             // Create a collection of points for a polyline  
-            System.Windows.Point Point1 = new System.Windows.Point(10, 100);
-            System.Windows.Point Point2 = new System.Windows.Point(100, 200);
-            System.Windows.Point Point3 = new System.Windows.Point(200, 30);
-            System.Windows.Point Point4 = new System.Windows.Point(250, 200);
-            System.Windows.Point Point5 = new System.Windows.Point(200, 150);
+            Point Point1 = new Point(list_1[0].X,list_1[0].Y);
+            Point Point2 = new Point(list_1[1].X,list_1[1].Y);
+
             PointCollection polygonPoints = new PointCollection();
             polygonPoints.Add(Point1);
             polygonPoints.Add(Point2);
-            polygonPoints.Add(Point3);
-            polygonPoints.Add(Point4);
-            polygonPoints.Add(Point5);
+          
             // Set Polyline.Points properties  
-            yellowPolyline.Points = polygonPoints;
+            polyline.Points = polygonPoints;
             // Add polyline to the page  
-            DrawArea.Children.Add(yellowPolyline);
+            DrawArea.Children.Add(polyline);
+        }
+        public void CreateCircle(Node node)
+        {
+            var circle1 = new Ellipse()
+            {
+                Fill = new SolidColorBrush(Colors.Black),
+                Width = 5,
+                Height = 5
+            };
+
+            Canvas.SetLeft(circle1, node.X);
+            Canvas.SetTop(circle1, node.Y);
+
+            DrawArea.Children.Add(circle1);
         }
     }
 }
