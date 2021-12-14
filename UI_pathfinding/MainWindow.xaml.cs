@@ -1,4 +1,4 @@
-﻿///  Mech 540-A  :  Team-2 Project; Path finding using A* Algorithm
+﻿///  Mech 540-A  :  Team-2 Project; Path finding using RRT Algorithm
 ///
 ///  Name        :  Ajay Nalla
 ///  Student ID  :  49640014
@@ -7,7 +7,7 @@
 ///                 Contains UI-Layout namespace.
 ///  Description :  Contains classes 
 ///                 MainWindow: Inherits from the Window class, Which is a form. Contains methods to activate button
-///                   click, mouse click, mouse move, mouse down and mouse up for various buttons and draw area.
+///                 click, mouse click, mouse move, mouse down and mouse up for various buttons and draw area.
 ///
 
 /// ************************* USINGS *************************
@@ -182,7 +182,7 @@ namespace UI_Layout
                 _isDragingRectangleSize = true;
             }
 
-            //Panel.SetZIndex(_currentItem, -10);
+            
 
             //If the draw area has any element in it, this code allows user to move those elements
             //aorund as he wants. He can move start point, end point and obstacles in the draw area.
@@ -319,7 +319,6 @@ namespace UI_Layout
         public List<RectangleData> getRectangleData()
         {
             var data = new List<RectangleData>();
-            string temp = "";
             foreach (UIElement drawAreaChild in DrawArea.Children)
             {
                 if (((Rectangle)drawAreaChild).Tag == "Obstacle")
@@ -340,13 +339,55 @@ namespace UI_Layout
 
                    //MessageBox.Show(string.Format("{0},{1},{2},{3} ", x1,y1,x2,y2), "Co-Ordinates of obstacles");
                     Console.WriteLine(x1 + ";" + y1 + "  " + x2 + ";" + y2);
-                    temp += "(" + x1 + "," + y1 + ") (" + x2 + "," + y2 + ") (" + x3 + "," + y3 + ") (" + x4 + "," + y4 + ")";
                 }  
             }
-            MessageBox.Show(temp,"Co-ordinates of Rectangle Obstacles");
             return data;
         }
-        
+        public void CreatePolyline(List<Node> list_1)
+        {
+            foreach (Node node in list_1)
+            {
+                Createpath(node);
+
+            }
+            SolidColorBrush blackBrush = new SolidColorBrush();
+            blackBrush.Color = Colors.Black;
+            // Create a polyline  
+            Polyline polyline = new Polyline();
+            polyline.Stroke = blackBrush;
+            polyline.StrokeThickness = 2;
+            // Create a collection of points for a polyline  
+            //Point Point1 = new Point(list_1[0].X,list_1[0].Y);
+            //Point Point2 = new Point(list_1[1].X,list_1[1].Y);
+            PointCollection polygonPoints = new PointCollection();
+            foreach (Node node in list_1)
+            {
+                Createpath(node);
+                Point nodepoint = new Point(node.X, node.Y);
+                polygonPoints.Add(nodepoint);
+            }
+            //polygonPoints.Add(Point1);
+            // polygonPoints.Add(Point2
+            // Set Polyline.Points properties  
+            polyline.Points = polygonPoints;
+            // Add polyline to the page  
+            DrawArea.Children.Add(polyline);
+        }
+        public void Createpath(Node node)
+        {
+
+            var circle1 = new Ellipse()
+            {
+                Fill = new SolidColorBrush(Colors.Black),
+                Width = 2,
+                Height = 2
+            };
+
+            Canvas.SetLeft(circle1, node.X + 1);
+            Canvas.SetTop(circle1, node.Y + 1);
+
+            DrawArea.Children.Add(circle1);
+        }
         /// ************************* METHOD *************************
         /// Method    : GeneratePathButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -365,78 +406,20 @@ namespace UI_Layout
                 return;
             }
 
-            MessageBox.Show(StartPoint.ToString(), "Co-ordinates of start point");
-            MessageBox.Show(EndPoint.ToString(), "Co-ordinates of end point");
-
+            string message = null;
+            message += "Start Point is" + "("+StartPoint.ToString()+")" + "\nEnd Point is" + "(" + EndPoint.ToString() + ")";
+            MessageBox.Show(message, "You are good to go please click ok to continue");
             //Get the list of obstacles
             // Do this only if the rectangle list is not empty
             List<RectangleData> data = getRectangleData();
 
             RRTree tree = new RRTree((Point)StartPoint, (Point)EndPoint);
             List<Node> finalPath = tree.CreateAndSearchRRT(data);
-
-            //foreach (Node node in finalPath)
-            //{
-            //    CreateCircle(node);
-            //}
-
-            MessageBox.Show("Path Found!");
-
-
-            // put your A* here
-            //condition to verify if the start and end elements are not null
-            /* 
-             else if(StartPoint != null && EndPoint != null)
-             {
-
-             }*/
-
-
+            CreatePolyline(finalPath);
+        
+            MessageBox.Show("Path Found! Please click ok to reset and startover");
+            ResetButton_Click(sender, e);
         }
-        public void CreatePolyline(Node[] list_1)
-        {
-            SolidColorBrush blackBrush = new SolidColorBrush();
-            blackBrush.Color = Colors.Black;
-            // Create a polyline  
-            Polyline polyline = new Polyline();
-            polyline.Stroke = blackBrush;
-            polyline.StrokeThickness = 4;
-            // Create a collection of points for a polyline  
-            Point Point1 = new Point(list_1[0].X,list_1[0].Y);
-            Point Point2 = new Point(list_1[1].X,list_1[1].Y);
-
-            foreach (Node node in list_1)
-            {
-
-            }
-            Canvas.SetLeft(circle1, node.X);
-            Canvas.SetTop(circle1, node.Y);
-
-            DrawArea.Children.Add(circle1);
-
-            PointCollection polygonPoints = new PointCollection();
-            polygonPoints.Add(Point1);
-            polygonPoints.Add(Point2);
-          
-            // Set Polyline.Points properties  
-            polyline.Points = polygonPoints;
-            // Add polyline to the page  
-            DrawArea.Children.Add(polyline);
-        }
-        public void Createpath(List<Node> list_1)
-        {
-            
-            var circle1 = new Ellipse()
-            {
-                Fill = new SolidColorBrush(Colors.Black),
-                Width = 5,
-                Height = 5
-            };
-
-            Canvas.SetLeft(circle1, node.X);
-            Canvas.SetTop(circle1, node.Y);
-
-            DrawArea.Children.Add(circle1);
-        }
+        
     }
 }
