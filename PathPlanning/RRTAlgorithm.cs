@@ -6,8 +6,7 @@
 ///  Purpose     :  Contains the RRTree class within the PathPlanning namespace. 
 ///  Description :  Allows a (Rapidly Exploring Random Tree) RRT roadmap to be created as a list of Node objects including a start and goal node. 
 ///                 Contains the public CreateRRT() method which is the main function for the class called when the user clicks the 'Generate button'.
-///                 Also contains the private GenerateNewSample(), CheckCollsionFree(), FindNearestNode() and ReturnPath() methods which are called 
-///                 by the CreateRRT() method.
+///                 Also contains the private GenerateNewSample(), CheckCollsionFree() and FindNearestNode() methods which are called by the CreateRRT() method.
 ///                             
 
 
@@ -27,7 +26,6 @@ namespace PathPlanning
     ///               2. GenerateNewSample()
     ///               3. CheckCollsionFree()
     ///               4. FindNearestNode()
-    ///               5. ReturnPath()
     
     class RRTree
     {
@@ -43,19 +41,15 @@ namespace PathPlanning
 
         public RRTree(Point start_, Point goal_)
         {
-            start.X = start_.X;
-            start.Y = start_.Y;
+            start = new Node(start_.X, start_.Y);
+            goal = new Node(goal_.X, goal_.Y);
             start.cost = 0;
-            goal.X = goal_.X;
-            goal.Y = goal_.Y;
 
-            float start_heuristic_cost = start.EuclideanDistance(goal);
-            start.heuristic_cost = start_heuristic_cost;
+            //float start_heuristic_cost = start.EuclideanDistance(goal);
+            //start.heuristic_cost = start_heuristic_cost;
 
-            //stepSize = stepSize_;
-
-            // Initialize RRT with start and end coordinates
-            //List<Node> roadmap = new List<Node>();
+            // Initialize RRT with start Node
+            roadmap = new List<Node>();
             roadmap.Add(start);
         }
 
@@ -88,18 +82,7 @@ namespace PathPlanning
                 }
             }
 
-            // Returns the list of nodes which make up the path
             List<Node> path = ReturnPath();
-
-            // Get the length of the path
-            float finalDistance = 0;
-            foreach (Node node in path)
-            {
-                finalDistance = finalDistance + node.cost;
-            }
-
-            // Find some way to return the final distance to the GUI window too. Maybe a tuple.
-
             return path;
         }
 
@@ -142,47 +125,54 @@ namespace PathPlanning
             double dx1 = nodeList_[1].X - nodeList_[0].X; // change in x for the new and nearest nodes
             double dy1 = nodeList_[1].Y - nodeList_[0].Y; // change in y for the new and nearest nodes
 
-            foreach (RectangleData obstacle in obstacleList_)
+            // Initialize parametric variables t1 and t2
+            double t1 = 0; double t2 = 0;
+
+            if (obstacleList_.Count != 0)
             {
-                // Generate coordinates for each of the four lines which make up the rectangle: { xstart, ystart, xend, yend }
-
-                double[] topLine = { obstacle.X1, obstacle.Y1, obstacle.X2, obstacle.Y2 };
-                double[] bottomLine = { obstacle.X3, obstacle.Y3, obstacle.X4, obstacle.Y4 };
-                double[] leftLine = { obstacle.X3, obstacle.Y3, obstacle.X1, obstacle.Y1 };
-                double[] rightline = { obstacle.X4, obstacle.Y4, obstacle.X2, obstacle.Y2 };
-
-                // Add lines to a generic list so we can iterate through each line
-                List<double[]> rectangleLines = new List<double[]>();
-
-                rectangleLines.Add(topLine); rectangleLines.Add(bottomLine);
-                rectangleLines.Add(rightline); rectangleLines.Add(leftLine);
-
-                // Initialize parametric variables t1 and t2
-                double t1 = 0; double t2 = 0;
-                
-                foreach (double[] line in rectangleLines)
+                foreach (RectangleData obstacle in obstacleList_)
                 {
-                    double dx2 = line[2] - line[0];
-                    double dy2 = line[3] - line[1];
+                    // Generate coordinates for each of the four lines which make up the rectangle: { xstart, ystart, xend, yend }
 
-                    double denominator = dy1 * dx2 - dx1 * dy2;
-                    t1 = ((nodeList_[0].X - line[0]) * dy2 + (line[1] - nodeList_[0].Y) * dx2) / denominator;
-                    t2 = ((line[0] - nodeList_[0].X) * dy1 + (nodeList_[0].Y - line[1]) * dx1)/ -denominator;
+                    double[] topLine = { obstacle.X1, obstacle.Y1, obstacle.X2, obstacle.Y2 };
+                    double[] bottomLine = { obstacle.X3, obstacle.Y3, obstacle.X4, obstacle.Y4 };
+                    double[] leftLine = { obstacle.X3, obstacle.Y3, obstacle.X1, obstacle.Y1 };
+                    double[] rightline = { obstacle.X4, obstacle.Y4, obstacle.X2, obstacle.Y2 };
+
+                    // Add lines to a generic list so we can iterate through each line
+                    List<double[]> rectangleLines = new List<double[]>();
+
+                    rectangleLines.Add(topLine); rectangleLines.Add(bottomLine);
+                    rectangleLines.Add(rightline); rectangleLines.Add(leftLine);
+
+                    foreach (double[] line in rectangleLines)
+                    {
+                        double dx2 = line[2] - line[0];
+                        double dy2 = line[3] - line[1];
+
+                        double denominator = dy1 * dx2 - dx1 * dy2;
+                        t1 = ((nodeList_[0].X - line[0]) * dy2 + (line[1] - nodeList_[0].Y) * dx2) / denominator;
+                        t2 = ((line[0] - nodeList_[0].X) * dy1 + (nodeList_[0].Y - line[1]) * dx1) / -denominator;
+
+                    }
+
+                    if ((t1 >= 0) && (t1 <= 1) && (t2 >= 0) && (t2 <= 1))
+                    {
+                        // Set the nearest node as the new node's parent.
+                        // Reminder: nodeList_[0] --> nearest node; nodeList_[1] --> new node
+                        nodeList_[1].parent = nodeList_[0];
+                        // Set the new node's cost as the cost of the parent node + cost between new node and nearest node
+                        // Maybe this might just be the cost between the new node and nearest node. Gonna see after A* Search is implemented.
+                        nodeList_[1].cost = nodeList_[0].cost + nodeList_[1].EuclideanDistance(nodeList_[0]);
+                        return true;
+                    }
 
                 }
-                
-                if ((t1 >= 0) && (t1 <= 1) && (t2 >= 0) && (t2 <= 1)) 
-                {
-                    // Set the nearest node as the new node's parent.
-                    // Reminder: nodeList_[0] --> nearest node; nodeList_[1] --> new node
-                    nodeList_[1].parent = nodeList_[0];
-                    // Set the new node's cost as the cost of the parent node + cost between new node and nearest node
-                    // Maybe this might just be the cost between the new node and nearest node. Gonna see after A* Search is implemented.
-                    // Update for thestatement above.. it was. [+ nodeList_[1].EuclideanDistance(nodeList_[0])]
-                    nodeList_[1].cost = nodeList_[0].cost;
-                    return true; 
-                }
-
+            }
+            else
+            {
+                // If there are no obstacles, return true.
+                return true;
             }
 
             return false;

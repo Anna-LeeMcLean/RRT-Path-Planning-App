@@ -42,18 +42,7 @@ namespace PathPlanning
         public Node parent { get; set; }
         // Gets and Sets the straight-line distance between the node and its parent
         public float cost { get; set; }
-        // Gets and Sets the straight-line distance between the node and the goal node for the roadmap
-        public float heuristic_cost { get; set; }  
-        // Gets and Sets the estimated cost of travelling to the node 
-        public float estimated_cost
-        {
-            get { return estimated_cost; }
-            set
-            {
-                estimated_cost = cost + heuristic_cost;
-            }
-        }
-
+       
         /// ***************************** METHODS *****************************
         /// Method    : EuclideanDistance()
         /// Arguments : 1 (Node)
