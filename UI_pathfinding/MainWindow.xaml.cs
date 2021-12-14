@@ -411,12 +411,17 @@ namespace UI_Layout
                 return;
             }
 
-            string message = null;
-            message += "Start Point is" + "("+StartPoint.ToString()+")" + "\nEnd Point is" + "(" + EndPoint.ToString() + ")";
-            MessageBox.Show(message, "You are good to go please click ok to continue");
-
             //Get the list of obstacles store in data
             List<RectangleData> data = getRectangleData();
+            
+            if(data.Count == 0)
+            {
+                MessageBox.Show("Please input atlest one obstacle", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ResetButton_Click(sender, e);
+            }
+            string message = null;
+            message += "Start Point is" + "(" + " " + StartPoint.ToString() + " " + ")" + "\nEnd Point is" + "(" + " " + EndPoint.ToString() + " " + ")";
+            MessageBox.Show(message, "You are good to go please click ok to continue");
 
             //Calling RRTree algorithm into the GUI
             RRTree tree = new RRTree((Point)StartPoint, (Point)EndPoint);
@@ -424,9 +429,11 @@ namespace UI_Layout
 
             //Creating the path on the canvas from start to end
             CreatePolyline(finalPath);
-        
-            MessageBox.Show("Path Found! Please click ok to reset and startover");
+
+            float dist_travelled = tree.ReturnFinalDistanceTravelled(finalPath);
+            MessageBox.Show("Path Found! Distance Travelled is "+ dist_travelled.ToString(),"The End");
             ResetButton_Click(sender, e);
+
         }
         
     }
