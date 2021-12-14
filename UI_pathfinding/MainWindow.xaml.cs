@@ -37,6 +37,8 @@ namespace UI_Layout
     ///               various buttons and draw area.
     public partial class MainWindow : Window
     {
+        /// ************************* GLOBAL VARIABLES *************************
+
         private UIElement _currentItem = null;
         private Point anchorPoint;
 
@@ -54,23 +56,17 @@ namespace UI_Layout
         /// Method    : MainWindow
         /// Arguments : None
         /// Returns   : Nothing
-        /// This method contains the form initializer, the program starts as soon as the window is open.
+        /// This method contains the component initializer, the program starts as soon as the window is open.
         public MainWindow()
         {
             InitializeComponent();
-            //CompositionTarget.Rendering += OnRendering;
         }
        
-        /* private void OnRendering(object sender, EventArgs e)
-         {
-
-         }*/
-
         /// ************************* METHOD *************************
         /// Method    : CancelDrawing()
         /// Arguments : None
         /// Returns   : Nothing
-        /// This method sets the Drawing elemets to false, used for calling in subsequent methods.
+        /// This method sets the Drawing elements to false, used for calling in subsequent methods.
         private void CancelDrawing()
         {
             _isDrawingStart = false;
@@ -78,6 +74,7 @@ namespace UI_Layout
             _isDrawingRectangle = false;
 
         }
+
         /// ************************* METHOD *************************
         /// Method    : StartButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -89,28 +86,31 @@ namespace UI_Layout
             CancelDrawing();
             _isDrawingStart = true;
         }
+
         /// ************************* METHOD *************************
         /// Method    : EndButton_Click
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
-        /// This method is a end point button click event, when the end button is 
+        /// This method is an end point button click event, when the end button is 
         /// clicked the end point drawing is enabled.
         private void EndButton_Click(object sender, RoutedEventArgs e)
         {
             CancelDrawing();
             _isDrawingEnd = true;
         }
+
         /// ************************* METHOD *************************
         /// Method    : DrawRectangleButton_Click
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
-        /// This method is a draw rctangle button click event, when the end button is 
+        /// This method is a draw rectangle button click event, when the button is 
         /// clicked the drawing rectangle is enabled.
         private void DrawRectangleButton_Click(object sender, RoutedEventArgs e)
         {
             CancelDrawing();
             _isDrawingRectangle = true;
         }
+
         /// ************************* METHOD *************************
         /// Method    : DrawArea_OnPreviewMouseLeftButtonDown
         /// Arguments : object sender, MouseButtonEventArgs e
@@ -121,7 +121,8 @@ namespace UI_Layout
         /// blue rectangles.
         private void DrawArea_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            //If start button is clicked and there is no start point already specified in the draw area.
+            //If start button is clicked and there is no start point already
+            //specified in the draw area.
             if (_isDrawingStart && StartPoint == null)
             {
                 //Create a new rectangle object.
@@ -132,15 +133,17 @@ namespace UI_Layout
                     Fill = new SolidColorBrush(Colors.Green),
                     Tag = "Start"
                 };
+
                 //Getting x and y co-ordinates of the object.
                 Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
                 Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
+
                 //Assiging the object as a StartPoint.
                 StartPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
-                
             }
+
             //if end button clicked and there is no end point already in the draw area.
             if (_isDrawingEnd && EndPoint == null)
             {
@@ -156,19 +159,20 @@ namespace UI_Layout
                 //Getting the x and y co-ordinates of the object.
                 Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
                 Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
+
                 //Assigning the object as EndPoint
                 EndPoint = new Point(e.GetPosition(DrawArea).X, e.GetPosition(DrawArea).Y);
-
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
-                
             }
+
             //if rectangle button is clicked
             if (_isDrawingRectangle)
             {
                 //Capturing mouse movements in the draw area.
                 DrawArea.CaptureMouse();
                 anchorPoint = e.MouseDevice.GetPosition(DrawArea);
+
                 //Creating new rectangle object.
                 _currentItem = new Rectangle()
                 {
@@ -178,11 +182,8 @@ namespace UI_Layout
 
                 DrawArea.Children.Add(_currentItem);
                 CancelDrawing();
-
                 _isDragingRectangleSize = true;
             }
-
-            
 
             //If the draw area has any element in it, this code allows user to move those elements
             //aorund as he wants. He can move start point, end point and obstacles in the draw area.
@@ -213,12 +214,11 @@ namespace UI_Layout
                         }
                         _isRemoving = false;
                         DrawArea.Children.Remove((UIElement)o);
-
                     }
                 };
             }
-
         }
+
         /// ************************* METHOD *************************
         /// Method    : DrawArea_OnPreviewMouseLeftButtonUp
         /// Arguments : object sender, MouseButtonEventArgs e
@@ -230,16 +230,17 @@ namespace UI_Layout
             //Stops the rectangle painting in the draw area.
             DrawArea.ReleaseMouseCapture();
         }
+
         /// ************************* METHOD *************************
         /// Method    : DrawArea_OnDragOver
         /// Arguments : object sender, DragEventArgs e
         /// Returns   : Nothing
         /// This method is collecting co-ordinates when mouse is dragged in the draw area.
+        /// Updating the co-ordinates of the start and end points if they are dragged to new place.
         private void DrawArea_OnDragOver(object sender, DragEventArgs e)
         {
             Canvas.SetLeft(_currentItem, e.GetPosition(DrawArea).X);
             Canvas.SetTop(_currentItem, e.GetPosition(DrawArea).Y);
-
 
             if (((Rectangle)_currentItem).Tag == "End")
             {
@@ -252,13 +253,12 @@ namespace UI_Layout
             }
         }
 
-
         /// ************************* METHOD *************************
         /// Method    : ResetButton_Click
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
         /// This method is a Resetbutton click event, when the reset button is clicked, 
-        /// all the elements in the draw area are removed and all values are set to sull.
+        /// all the elements in the draw area are removed and all values are set to null.
         /// Cleaning/resetting the entire draw area.
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
@@ -268,6 +268,7 @@ namespace UI_Layout
             EndPoint = null;
             DrawArea.Children.Clear();
         }
+
         /// ************************* METHOD *************************
         /// Method    : RemoveButton_Click
         /// Arguments : object sender, RoutedEventArgs e
@@ -278,6 +279,7 @@ namespace UI_Layout
         {
             _isRemoving = true;
         }
+
         /// ************************* METHOD *************************
         /// Method    : DrawArea_OnPreviewMouseMove
         /// Arguments : object sender, MouseEventArgs e
@@ -288,6 +290,7 @@ namespace UI_Layout
             //if mousecaptures inside draw area is false
             if (!DrawArea.IsMouseCaptured)
                 return;
+
             //The rectangle button is clicked and mouse is clicked within the draw area
             if (_isDragingRectangleSize)
             {
@@ -307,12 +310,11 @@ namespace UI_Layout
 
                 ((Rectangle)_currentItem).Height = Math.Abs(height);
                 ((Rectangle)_currentItem).Width = Math.Abs(width);
-
-
             }
         }
+
         /// ************************* METHOD *************************
-        /// Method    : getData()
+        /// Method    : getRectangleData()
         /// Arguments : None
         /// Returns   : data (list of obstacle co-ordinates)
         /// This method is for creating a list of co-ordinates of the obstacles.
@@ -336,51 +338,54 @@ namespace UI_Layout
                     double y4 = y1 + ((Rectangle)drawAreaChild).Height; 
 
                     data.Add(new RectangleData(x1, y1, x2, y2,x3,y3,x4,y4));
-
-                   //MessageBox.Show(string.Format("{0},{1},{2},{3} ", x1,y1,x2,y2), "Co-Ordinates of obstacles");
-                    Console.WriteLine(x1 + ";" + y1 + "  " + x2 + ";" + y2);
                 }  
             }
             return data;
         }
+
+        /// ************************* METHOD *************************
+        /// Method    : CreatePolyline
+        /// Arguments : List of Nodes (points)
+        /// Returns   : Nothing
+        /// This method is for drawing circles on the canvas and connecting those
+        /// circles with line. The path from start to end will be shown.
         public void CreatePolyline(List<Node> list_1)
         {
-            foreach (Node node in list_1)
-            {
-                Createpath(node);
-
-            }
             SolidColorBrush blackBrush = new SolidColorBrush();
             blackBrush.Color = Colors.Black;
-            // Create a polyline  
+
+            // Create a polyline with properties
             Polyline polyline = new Polyline();
             polyline.Stroke = blackBrush;
             polyline.StrokeThickness = 2;
+
             // Create a collection of points for a polyline  
-            //Point Point1 = new Point(list_1[0].X,list_1[0].Y);
-            //Point Point2 = new Point(list_1[1].X,list_1[1].Y);
             PointCollection polygonPoints = new PointCollection();
             foreach (Node node in list_1)
             {
-                Createpath(node);
-                Point nodepoint = new Point(node.X, node.Y);
+                CreatePath(node);
+                Point nodepoint = new Point(node.X+1, node.Y+1);
                 polygonPoints.Add(nodepoint);
             }
-            //polygonPoints.Add(Point1);
-            // polygonPoints.Add(Point2
+  
             // Set Polyline.Points properties  
             polyline.Points = polygonPoints;
-            // Add polyline to the page  
+            // Add polyline to the draw area children
             DrawArea.Children.Add(polyline);
         }
-        public void Createpath(Node node)
-        {
 
+        /// ************************* METHOD *************************
+        /// Method    : CreatePath
+        /// Arguments : Node
+        /// Returns   : Nothing
+        /// This method is for creating drawing circles on canvas at given nodes.
+        public void CreatePath(Node node)
+        {
             var circle1 = new Ellipse()
             {
                 Fill = new SolidColorBrush(Colors.Black),
-                Width = 2,
-                Height = 2
+                Width = 3,
+                Height = 3
             };
 
             Canvas.SetLeft(circle1, node.X + 1);
@@ -393,12 +398,12 @@ namespace UI_Layout
         /// Arguments : object sender, RoutedEventArgs e
         /// Returns   : Nothing
         /// This method is generate button click event, when this is clicked
-        /// the start point and point co-ordinates for now are sent to console winodw. 
+        /// the start point and point co-ordinates are sent to console winodw. 
         /// Here the next code for collecting rectangle object co-ordinates also will be
-        /// coming, the A* algorith can be called/interacted within this button to take 
+        /// coming, the RRT algorith can be called/interacted within this button to take 
         /// co-ordinates of start, end and obstacle data ==> do the path generation ==>
         /// and send the co-ordinates of path points that the GUI can use to draw the line path.
-
+        /// Calls multiple methods to achive the visual representation of Path generated by the Algorithm.
         private void GeneratePathButton_Click(object sender, RoutedEventArgs e)
         {
             if (StartPoint == null || EndPoint == null)
@@ -409,12 +414,15 @@ namespace UI_Layout
             string message = null;
             message += "Start Point is" + "("+StartPoint.ToString()+")" + "\nEnd Point is" + "(" + EndPoint.ToString() + ")";
             MessageBox.Show(message, "You are good to go please click ok to continue");
-            //Get the list of obstacles
-            // Do this only if the rectangle list is not empty
+
+            //Get the list of obstacles store in data
             List<RectangleData> data = getRectangleData();
 
+            //Calling RRTree algorithm into the GUI
             RRTree tree = new RRTree((Point)StartPoint, (Point)EndPoint);
             List<Node> finalPath = tree.CreateAndSearchRRT(data);
+
+            //Creating the path on the canvas from start to end
             CreatePolyline(finalPath);
         
             MessageBox.Show("Path Found! Please click ok to reset and startover");
