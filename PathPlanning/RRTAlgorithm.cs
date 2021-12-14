@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using UI_Layout;
 
 namespace PathPlanning
@@ -34,7 +35,7 @@ namespace PathPlanning
         public List<Node> roadmap;
         public Node start;
         public Node goal;
-        public float stepSize = 0.1f;
+        public float stepSize = 25f;
         public bool goalAddedToRoadmap = false;
 
         // CONSTRUCTOR
@@ -44,9 +45,6 @@ namespace PathPlanning
             start = new Node(start_.X, start_.Y);
             goal = new Node(goal_.X, goal_.Y);
             start.cost = 0;
-
-            //float start_heuristic_cost = start.EuclideanDistance(goal);
-            //start.heuristic_cost = start_heuristic_cost;
 
             // Initialize RRT with start Node
             roadmap = new List<Node>();
@@ -66,11 +64,15 @@ namespace PathPlanning
 
                 if (CheckCollisionFree(nodeList, obstacleList_))
                 {
-                    // DrawEdge();
+                    //mainWindow.CreateCircle(nodeList[0]);
+                    //mainWindow.CreateCircle(nodeList[1]);
+                    //mainWindow.CreateAPolyline(nodeList);
+                    
                     roadmap.Add(nodeList[1]);
 
                     // If the new node is within range of the goal node, complete the roadmap
-                    if (nodeList[1].EuclideanDistance(goal) < stepSize)
+                    float distanceFromGoal = nodeList[1].EuclideanDistance(goal);
+                    if (distanceFromGoal < stepSize)
                     {
                         goal.parent = nodeList[1];
                         roadmap.Add(goal);
@@ -96,8 +98,10 @@ namespace PathPlanning
             // Create x and y coords for a new sample between 0 and 5 (the dimensions of the environment)
             // Sample a random coordinate (node) in the environment
             Random randomDouble = new Random();
-            double xSample = randomDouble.NextDouble() * MainWindow.window_height;
-            double ySample = randomDouble.NextDouble() * MainWindow.window_width;
+            //double xSample = randomDouble.NextDouble() * MainWindow.window_height;
+            //double ySample = randomDouble.NextDouble() * MainWindow.window_width;
+            double xSample = randomDouble.NextDouble() * 800;
+            double ySample = randomDouble.NextDouble() * 350;
             Node sample = new Node(xSample, ySample);
 
             Node nearestNode = FindNearestNode(sample);
@@ -142,8 +146,10 @@ namespace PathPlanning
                     // Add lines to a generic list so we can iterate through each line
                     List<double[]> rectangleLines = new List<double[]>();
 
-                    rectangleLines.Add(topLine); rectangleLines.Add(bottomLine);
-                    rectangleLines.Add(rightline); rectangleLines.Add(leftLine);
+                    rectangleLines.Add(topLine); 
+                    rectangleLines.Add(bottomLine);
+                    rectangleLines.Add(rightline); 
+                    rectangleLines.Add(leftLine);
 
                     foreach (double[] line in rectangleLines)
                     {
@@ -154,28 +160,31 @@ namespace PathPlanning
                         t1 = ((nodeList_[0].X - line[0]) * dy2 + (line[1] - nodeList_[0].Y) * dx2) / denominator;
                         t2 = ((line[0] - nodeList_[0].X) * dy1 + (nodeList_[0].Y - line[1]) * dx1) / -denominator;
 
+                        if ((t1 >= 0) && (t1 <= 1) && (t2 >= 0) && (t2 <= 1))
+                        {
+                            // If this condition is met, the new line vector intersects with one of the lines of one of the rectangles.
+                            return false;
+                        }
                     }
-
-                    if ((t1 >= 0) && (t1 <= 1) && (t2 >= 0) && (t2 <= 1))
-                    {
-                        // Set the nearest node as the new node's parent.
-                        // Reminder: nodeList_[0] --> nearest node; nodeList_[1] --> new node
-                        nodeList_[1].parent = nodeList_[0];
-                        // Set the new node's cost as the cost of the parent node + cost between new node and nearest node
-                        // Maybe this might just be the cost between the new node and nearest node. Gonna see after A* Search is implemented.
-                        nodeList_[1].cost = nodeList_[0].cost + nodeList_[1].EuclideanDistance(nodeList_[0]);
-                        return true;
-                    }
-
                 }
+
+                // This part of the method can only be accessed once the new vector does not intersect with any of the lines of any of the obstacles.
+
+                // Set the nearest node as the new node's parent.
+                // Reminder: nodeList_[0] --> nearest node; nodeList_[1] --> new node
+                nodeList_[1].parent = nodeList_[0];
+                // Set the new node's cost as the cost of the parent node + cost between new node and nearest node
+                // Maybe this might just be the cost between the new node and nearest node. Gonna see after A* Search is implemented.
+                nodeList_[1].cost = nodeList_[0].cost + nodeList_[1].EuclideanDistance(nodeList_[0]);
+
+                return true;
+
             }
             else
             {
                 // If there are no obstacles, return true.
                 return true;
             }
-
-            return false;
         }
 
         /// ******************************** METHOD ********************************

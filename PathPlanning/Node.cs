@@ -22,7 +22,7 @@ namespace PathPlanning
     ///               a parent node, a past cost, a heurustic cost and an estimated cost.
     /// Methods     : 1. EuclideanDistance()
     
-    class Node 
+    public class Node 
     {
         // ATTRIBUTES
         public double X;
@@ -52,15 +52,6 @@ namespace PathPlanning
         {
             float distance = (float)Math.Sqrt(Math.Pow(X - node2.X, 2) + Math.Pow(Y - node2.Y, 2));
             return distance;
-        }
-
-        public bool Equals(Node node2)
-        {
-            if ((X == node2.X) && (Y == node2.Y))
-            {
-                return true;
-            }
-            return false;
         }
     }
 }
