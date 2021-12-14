@@ -13,7 +13,7 @@
 ### MECH 540A 101 2021W1 Emerging Topics in Mechatronics, Manufacturing, Controls, and Automation - SFTWR DSGN MECH FINAL PROJECT
 **Authors:** Ajay Nalla and Anna-Lee McLean
 
-**Purpose:** RRT Path Planning application for a mobile robot in a 2D, obstacle-filled environment.
+**Purpose:** RRT Autonomous Path Planning application for a mobile robot in a 2D, obstacle-filled environment.
 
 ---
 
@@ -31,4 +31,4 @@ This project implements a path planning application for a mobile robot. Given a 
 ### **B. Usage Instructions**
 To run the program, the .NET Framework is required. Extract the executable from the app.zip folder to run the application. The necessary runtime files (.dll, .runtimeconfig etc.) are also included in the app.zip folder.
 
-The application has been configured to accept start point coordinates, end point coordinates and rectangular obstacles within the GUI window. The step size for the tree is 0.1 and the window size is set to (800, 450) in size.
+The application has been configured to accept start point coordinates, end point coordinates and rectangular obstacles within the GUI window. The step size for the tree is 0.1 and the window size is set to (650, 300) in size.
