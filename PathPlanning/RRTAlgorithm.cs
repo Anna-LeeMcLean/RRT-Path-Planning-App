@@ -175,6 +175,11 @@ namespace PathPlanning
             }
             else
             {
+                // Set the nearest node as the new node's parent.
+                // Reminder: nodeList_[0] --> nearest node; nodeList_[1] --> new node
+                nodeList_[1].parent = nodeList_[0];
+                // Set the new node's cost as the cost of the parent node + cost between new node and nearest node
+                nodeList_[1].cost = nodeList_[1].EuclideanDistance(nodeList_[0]);
                 // If there are no obstacles, return true.
                 return true;
             }
@@ -221,6 +226,9 @@ namespace PathPlanning
                 finalPath.Add(currentNode);
                 currentNode = currentNode.parent;
             }
+
+            // Add the start node to complete the final path
+            finalPath.Add(start);
 
             return finalPath;
         }

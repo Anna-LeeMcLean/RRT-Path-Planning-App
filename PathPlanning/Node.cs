@@ -33,7 +33,7 @@ namespace PathPlanning
         {
             X = X_;
             Y = Y_;
-            cost = float.PositiveInfinity;
+            cost = 0;
         }
 
         // GETTERS AND SETTERS
