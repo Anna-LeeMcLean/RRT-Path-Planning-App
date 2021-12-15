@@ -414,11 +414,6 @@ namespace UI_Layout
             //Get the list of obstacles store in data
             List<RectangleData> data = getRectangleData();
             
-            if(data.Count == 0)
-            {
-                MessageBox.Show("Please input atlest one obstacle", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                ResetButton_Click(sender, e);
-            }
             string message = null;
             message += "Start Point is" + "(" + " " + StartPoint.ToString() + " " + ")" + "\nEnd Point is" + "(" + " " + EndPoint.ToString() + " " + ")";
             MessageBox.Show(message, "You are good to go please click ok to continue");
